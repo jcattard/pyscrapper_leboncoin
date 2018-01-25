@@ -40,16 +40,18 @@ if __name__ == '__main__':
     surface_min = args.surface_min
     
     if str(prix_max) not in DEFAULT_PRIX:
-        raise Exception("Wrong PRICE: price "+str(prix_max)+" does not exist, cadidates are ["+"; ".join([str(k) for k in DEFAULT_PRIX.keys()])+"]")
-    
+        sys.exit("Wrong PRICE: price "+str(prix_max)+" does not exist, cadidates are ["+"; ".join([str(k) for k in DEFAULT_PRIX.keys()])+"]")
+    if str(surface_min) not in DEFAULT_SURFACE:
+        sys.exit("Wrong surface: surface "+str(surface_min)+" does not exist, cadidates are ["+"; ".join([str(k) for k in DEFAULT_SURFACE.keys()])+"]")
+
     keys = list(DEFAULT_LOCALISATIONS.keys())
     for key in keys:
         cp = key
         ville = DEFAULT_LOCALISATIONS[key]
         if(nbr_piece>0):
-            URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX[str(prix_max)]+'&sqs=6&ros='+str(nbr_piece)+'&ret='+DEFAULT_TYPES[type_bien]
+            URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX[str(prix_max)]+'&sqs='+DEFAULT_SURFACE[str(surface_min)]+'&ros='+str(nbr_piece)+'&ret='+DEFAULT_TYPES[type_bien]
         else:
-            URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX[str(prix_max)]+'&sqs=6&ret='+DEFAULT_TYPES[type_bien]
+            URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX[str(prix_max)]+'&sqs='+DEFAULT_SURFACE[str(surface_min)]+'&ret='+DEFAULT_TYPES[type_bien]
         print(ville + " " + cp)
         for item in browse(URL, DEFAULT_CATEGORIES):
             try:
