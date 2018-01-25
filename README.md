@@ -1,5 +1,4 @@
-leboncoin-scraper
-=================
+pyscrapper_leboncoin
+====================
 
-Web scraper for the french classified ads website "Le Bon Coin"
-# pyscrapper_leboncoin
+
