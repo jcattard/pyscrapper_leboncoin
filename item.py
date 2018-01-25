@@ -25,20 +25,23 @@ class Item(object):
         self.serialized_data = javascript_array2python_list(object_data)
 
     def save(self):
+        print(self.serialized_data['titre'])
+        print("annonce : " + self.serialized_data['offres'])
+        print("publié le : " + self.serialized_data['publish_date'])
+        print("dernière modification le : " + self.serialized_data['last_update_date'])
+        print("photo disponible : " + self.serialized_data['nbphoto'])
+        print("prix : " + self.serialized_data['prix'])
+        print("surface : " + self.serialized_data['surface'])
+        print("nombre de pièces : " + self.serialized_data['pieces'])
         try:
-            print(self.serialized_data['titre'])
-            print("annonce : " + self.serialized_data['offres'])
-            print("publié le : " + self.serialized_data['publish_date'])
-            print("dernière modification le : " + self.serialized_data['last_update_date'])
-            print("photo disponible : " + self.serialized_data['nbphoto'])
-            print("prix : " + self.serialized_data['prix'])
-            print("surface : " + self.serialized_data['surface'])
-            print("nombre de pièces : " + self.serialized_data['pieces'])
             print("ges : " + self.serialized_data['ges'])
-            print("nrj : " + self.serialized_data['nrj'])
-            print("url : " + self.url)
         except:
             pass
+        try:
+            print("nrj : " + self.serialized_data['nrj'])
+        except:
+            pass
+        print("url : " + self.item_url)
         
     def __str__(self):
         return(self.item_url)
