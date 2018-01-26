@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from urllib.request import urlopen
-import os
+import os, random
 from reportlab.lib.units import inch, cm
 
 def javascript_array2python_list(array):
@@ -52,14 +52,15 @@ def write_pdf(item, c):
 
     # Download and write img
     for i in range(0,len(item.url_img_list)):
+        noise = str(int(random.random()*100000))
         url = item.url_img_list[i]
-        f = open(str(i)+".jpg",'wb')
+        f = open(noise+str(i)+".jpg",'wb')
         f.write(urlopen(url).read())
         f.close()
         # write img in pdf
-        c.drawImage(str(i)+".jpg", 0, 0, 20*cm, 30*cm)
+        c.drawImage(noise+str(i)+".jpg", 0, 0, 20*cm, 30*cm)
         # Delete img files
-        os.remove(str(i)+".jpg")
+        os.remove(noise+str(i)+".jpg")
         c.showPage()
         
 
