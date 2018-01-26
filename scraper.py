@@ -5,6 +5,7 @@ from urllib.parse import quote
 from bs4 import BeautifulSoup
 import argparse, sys
 from common import DEFAULT_CATEGORIES, DEFAULT_LOCALISATIONS, DEFAULT_TYPES, DEFAULT_SURFACE, DEFAULT_PRIX
+from reportlab.pdfgen import canvas
 
 def browse(url, categories):
     category = url.split('/')[3]
@@ -47,6 +48,8 @@ if __name__ == '__main__':
 
     # Loop on define location
     keys = list(DEFAULT_LOCALISATIONS.keys())
+    # begin pdf file
+    c = canvas.Canvas('results.pdf')
     for key in keys:
         cp = key
         ville = DEFAULT_LOCALISATIONS[key]
@@ -61,10 +64,14 @@ if __name__ == '__main__':
         for item in browse(URL, DEFAULT_CATEGORIES):
             try:
                 item.serialize()
-                item.save()
+                item.save(c)
                 print("-----")
             except:
                 print(item.ad_number())
                 print("%s: %s" % (sys.exc_info()[0], sys.exc_info()[1]))
                 break
         print("=====")
+        c.save()
+    # close pdf file
+    c.save()
+

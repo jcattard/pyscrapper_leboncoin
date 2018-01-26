@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from utils import javascript_array2python_list, get_img_urls
+from utils import javascript_array2python_list, get_img_urls, write_pdf
 import json
 
 class Immobilier(object):
@@ -29,26 +29,28 @@ class Immobilier(object):
         script_img = body.find_all('script')[7]
         self.url_img_list = get_img_urls(script_img)
 
-    def save(self):
+    def save(self, canvas):
         print(self.serialized_data['titre'])
-        print(self.data.find('p', class_='item_photo').get_text())
-        print("annonce : " + self.serialized_data['offres'])
-        print("publié le : " + self.serialized_data['publish_date'])
-        print("dernière modification le : " + self.serialized_data['last_update_date'])
-        print("photo disponible : " + self.serialized_data['nbphoto'])
-        print("prix : " + self.serialized_data['prix'])
-        print("surface : " + self.serialized_data['surface'])
-        print("nombre de pièces : " + self.serialized_data['pieces'])
-        try:
-            print("ges : " + self.serialized_data['ges'])
-        except:
-            pass
-        try:
-            print("nrj : " + self.serialized_data['nrj'])
-        except:
-            pass
-        print("url : " + self.item_url)
-        print(self.url_img_list)
+        # print(self.data.find('p', class_='item_photo').get_text())
+        # print("annonce : " + self.serialized_data['offres'])
+        # print("publié le : " + self.serialized_data['publish_date'])
+        # print("dernière modification le : " + self.serialized_data['last_update_date'])
+        # print("photo disponible : " + self.serialized_data['nbphoto'])
+        # print("prix : " + self.serialized_data['prix'])
+        # print("surface : " + self.serialized_data['surface'])
+        # print("nombre de pièces : " + self.serialized_data['pieces'])
+        # try:
+        #     print("ges : " + self.serialized_data['ges'])
+        # except:
+        #     pass
+        # try:
+        #     print("nrj : " + self.serialized_data['nrj'])
+        # except:
+        #     pass
+        # print("url : " + self.item_url)
+
+        # generate pdf
+        write_pdf(self, canvas)
         
     def __str__(self):
         return(self.item_url)
