@@ -49,7 +49,7 @@ if __name__ == '__main__':
     # Loop on define location
     keys = list(DEFAULT_LOCALISATIONS.keys())
     # begin pdf file
-    c = canvas.Canvas('results.pdf')
+    c = canvas.Canvas('report.pdf')
     for key in keys:
         cp = key
         ville = DEFAULT_LOCALISATIONS[key]
