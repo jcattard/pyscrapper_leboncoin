@@ -2,7 +2,7 @@
 from utils import javascript_array2python_list
 import json
 
-class Item(object):
+class Immobilier(object):
     def __init__(self, item_url, data):
         self.item_url = item_url
         self.data = data

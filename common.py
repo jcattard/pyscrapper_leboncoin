@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from item import Item
+from item import Immobilier
 
 DEFAULT_CATEGORIES = {
     # 'voitures': Item,
-    'ventes_immobilieres': Item
+    'ventes_immobilieres': Immobilier
 }
 
 DEFAULT_LOCALISATIONS = {
