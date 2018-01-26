@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from utils import javascript_array2python_list
+from utils import javascript_array2python_list, get_img_urls
 import json
 
 class Immobilier(object):
@@ -7,6 +7,7 @@ class Immobilier(object):
         self.item_url = item_url
         self.data = data
         self.serialized_data = None
+        self.url_img_list = []
 
     def ad_number(self):
         p1 = self.item_url.rindex("/") + 1
@@ -14,6 +15,7 @@ class Immobilier(object):
         return self.item_url[p1:p2]
 
     def serialize(self):
+        # get infos
         body = self.data.find('body')
         script_elt = str(body.findAll('script')[3])
         begin = script_elt.index('{')
@@ -23,9 +25,13 @@ class Immobilier(object):
         end_option = object_data[:-1].rfind('}') + 1
         object_data = object_data[0:begin_option-1]+object_data[end_option+10:]
         self.serialized_data = javascript_array2python_list(object_data)
+        # get picture urls
+        script_img = body.find_all('script')[7]
+        self.url_img_list = get_img_urls(script_img)
 
     def save(self):
         print(self.serialized_data['titre'])
+        print(self.data.find('p', class_='item_photo').get_text())
         print("annonce : " + self.serialized_data['offres'])
         print("publié le : " + self.serialized_data['publish_date'])
         print("dernière modification le : " + self.serialized_data['last_update_date'])
@@ -42,6 +48,7 @@ class Immobilier(object):
         except:
             pass
         print("url : " + self.item_url)
+        print(self.url_img_list)
         
     def __str__(self):
         return(self.item_url)
