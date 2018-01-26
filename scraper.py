@@ -3,9 +3,10 @@
 from urllib.request import urlopen
 from urllib.parse import quote
 from bs4 import BeautifulSoup
-import argparse, sys
+import argparse, sys, os, glob
 from common import DEFAULT_CATEGORIES, DEFAULT_LOCALISATIONS, DEFAULT_TYPES, DEFAULT_SURFACE, DEFAULT_PRIX
-from reportlab.pdfgen import canvas
+from reportlab.platypus import SimpleDocTemplate
+from reportlab.lib.pagesizes import A4, landscape
 
 def browse(url, categories):
     category = url.split('/')[3]
@@ -49,7 +50,9 @@ if __name__ == '__main__':
     # Loop on define location
     keys = list(DEFAULT_LOCALISATIONS.keys())
     # begin pdf file
-    c = canvas.Canvas('report.pdf')
+    doc = SimpleDocTemplate("report.pdf",pagesize=landscape(A4))
+    story=[]
+
     for key in keys:
         cp = key
         ville = DEFAULT_LOCALISATIONS[key]
@@ -64,12 +67,15 @@ if __name__ == '__main__':
         for item in browse(URL, DEFAULT_CATEGORIES):
             try:
                 item.serialize()
-                item.save(c)
+                story += item.save(doc)
                 print("-----")
             except:
                 print(item.ad_number())
                 print("%s: %s" % (sys.exc_info()[0], sys.exc_info()[1]))
         print("=====")
     # close pdf file
-    c.save()
+    doc.build(story)
+    # Delete img files
+    for f in glob.glob("*.jpg"):
+        os.remove(f)
 

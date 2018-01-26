@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from urllib.request import urlopen
-import os, random
+import random
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4, landscape
-from reportlab.platypus import Image
+from reportlab.platypus import Image, PageBreak, Paragraph
+from reportlab.lib import utils
+from reportlab.lib.styles import getSampleStyleSheet
 
 
 def javascript_array2python_list(array):
@@ -23,50 +25,48 @@ def get_img_urls(script_img):
             url_img_list.append(line[begin_url+1:end_url])
     return(url_img_list)
 
+def get_image(path, width=1*cm):
+    img = utils.ImageReader(path)
+    iw, ih = img.getSize()
+    aspect = ih / float(iw)
+    return Image(path, width=width, height=(width * aspect))
 
-def write_pdf(item, c):
-    # write infos
-    c.setFont('Helvetica-Bold', 15)
-    c.drawString(100,750,item.serialized_data['titre'].replace('"',''))
-    c.setFont('Helvetica', 8)    
-    c.drawString(100,700,"url : " + item.item_url)
-    c.drawString(100,680,"annonce : " + item.serialized_data['offres'].replace('"',''))
-    c.drawString(100,660,"ville : " + item.serialized_data['city'].replace('"','') + " ("+item.serialized_data['cp'].replace('"','')+")")
-    c.drawString(100,640,"publié le : " + item.serialized_data['publish_date'].replace('"',''))
-    c.drawString(100,620,"dernière modification le : " + item.serialized_data['last_update_date'].replace('"',''))
-    c.drawString(100,600,"photo disponible : " + item.serialized_data['nbphoto'].replace('"',''))
-    c.drawString(100,580,"prix : " + item.serialized_data['prix'].replace('"',''))
-    c.drawString(100,560,"surface : " + item.serialized_data['surface'].replace('"',''))
-    c.drawString(100,540,"nombre de pièces : " + item.serialized_data['pieces'].replace('"',''))
+
+def write_pdf(item, doc):
+    styles = getSampleStyleSheet()
+    Story=[]
+    Story.append(Paragraph(item.serialized_data['titre'].replace('"',''), styles["Title"]))
+
+    Story.append(Paragraph("url : " + item.item_url, styles["Bullet"]))
+    Story.append(Paragraph("annonce : " + item.serialized_data['offres'].replace('"',''), styles["Bullet"]))
+    Story.append(Paragraph("ville : " + item.serialized_data['city'].replace('"','') + " ("+item.serialized_data['cp'].replace('"','')+")", styles["Bullet"]))
+    Story.append(Paragraph("publié le : " + item.serialized_data['publish_date'].replace('"',''), styles["Bullet"]))
+    Story.append(Paragraph("dernière modification le : " + item.serialized_data['last_update_date'].replace('"',''), styles["Bullet"]))
+    Story.append(Paragraph("photo disponible : " + item.serialized_data['nbphoto'].replace('"',''), styles["Bullet"]))
+    Story.append(Paragraph("prix : " + item.serialized_data['prix'].replace('"',''), styles["Bullet"]))
+    Story.append(Paragraph("surface : " + item.serialized_data['surface'].replace('"',''), styles["Bullet"]))
+    Story.append(Paragraph("nombre de pièces : " + item.serialized_data['pieces'].replace('"',''), styles["Bullet"]))
     try:
-        c.drawString(100,520,"ges : " + item.serialized_data['ges'].replace('"',''))
+        Story.append(Paragraph("ges : " + item.serialized_data['ges'].replace('"',''), styles["Bullet"]))
     except:
         pass
     try:
-        c.drawString(100,500,"nrj : " + item.serialized_data['nrj'].replace('"',''))
+        Story.append(Paragraph("nrj : " + item.serialized_data['nrj'].replace('"',''), styles["Bullet"]))
     except:
         pass
+    Story.append(Paragraph(item.description, styles["Bullet"]))
+    Story.append(PageBreak())
 
-    textobject = c.beginText()
-    textobject.setTextOrigin(100, 480)
-    textobject.textLines(item.description.replace('.','.\n'))
-    c.drawText(textobject)
-    c.showPage()
-
-    c.setPageSize(landscape(A4))
     # Download and write img
     for i in range(0,len(item.url_img_list)):
-        noise = str(int(random.random()*100000))
+        filename = str(int(random.random()*100000))+str(i)+".jpg"
         url = item.url_img_list[i]
-        f = open(noise+str(i)+".jpg",'wb')
+        f = open(filename,'wb')
         f.write(urlopen(url).read())
         f.close()
-        image = Image(noise+str(i)+".jpg")
-        # write img in pdf
-        c.drawImage(noise+str(i)+".jpg", 0, 0, image.drawWidth*(landscape(A4)[0]/image.drawWidth), image.drawHeight*(landscape(A4)[1]/image.drawHeight))
-        # Delete img files
-        os.remove(noise+str(i)+".jpg")
-        c.showPage()
+        # write imgs
+        im = Image(filename, 20*cm, 15*cm)
+        Story.append(im)
+        Story.append(PageBreak())
         
-
-    c.setPageSize(A4)
+    return(Story)

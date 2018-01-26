@@ -30,7 +30,7 @@ class Immobilier(object):
         self.url_img_list = get_img_urls(script_img)
         self.description = self.data.find('p', class_="value", itemprop="description").text
 
-    def save(self, canvas):
+    def save(self, doc):
         print(self.serialized_data['titre'])
         # print(self.data.find('p', class_='item_photo').get_text())
         # print("annonce : " + self.serialized_data['offres'])
@@ -51,7 +51,7 @@ class Immobilier(object):
         # print("url : " + self.item_url)
 
         # generate pdf
-        write_pdf(self, canvas)
+        return(write_pdf(self, doc))
         
     def __str__(self):
         return(self.item_url)
