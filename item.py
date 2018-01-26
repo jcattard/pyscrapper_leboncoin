@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from utils import javascript_array2python_list, get_img_urls, write_pdf
-import json
 
 class Immobilier(object):
     def __init__(self, item_url, data):
@@ -8,6 +7,7 @@ class Immobilier(object):
         self.data = data
         self.serialized_data = None
         self.url_img_list = []
+        self.description = ""
 
     def ad_number(self):
         p1 = self.item_url.rindex("/") + 1
@@ -28,6 +28,7 @@ class Immobilier(object):
         # get picture urls
         script_img = body.find_all('script')[7]
         self.url_img_list = get_img_urls(script_img)
+        self.description = self.data.find('p', class_="value", itemprop="description").text
 
     def save(self, canvas):
         print(self.serialized_data['titre'])

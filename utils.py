@@ -22,28 +22,35 @@ def get_img_urls(script_img):
 
 
 def write_pdf(item, c):
+    # write infos
     c.setFont('Helvetica-Bold', 15)
-    c.drawString(100,750,item.serialized_data['titre'])
+    c.drawString(100,750,item.serialized_data['titre'].replace('"',''))
     c.setFont('Helvetica', 8)    
     c.drawString(100,700,"url : " + item.item_url)
-    c.drawString(100,650,"annonce : " + item.serialized_data['offres'])
-    c.drawString(100,600,"publié le : " + item.serialized_data['publish_date'])
-    c.drawString(100,550,"dernière modification le : " + item.serialized_data['last_update_date'])
-    c.drawString(100,500,"photo disponible : " + item.serialized_data['nbphoto'])
-    c.drawString(100,450,"prix : " + item.serialized_data['prix'])
-    c.drawString(100,400,"surface : " + item.serialized_data['surface'])
-    c.drawString(100,350,"nombre de pièces : " + item.serialized_data['pieces'])
+    c.drawString(100,680,"annonce : " + item.serialized_data['offres'].replace('"',''))
+    c.drawString(100,660,"ville : " + item.serialized_data['city'].replace('"','') + " ("+item.serialized_data['cp'].replace('"','')+")")
+    c.drawString(100,640,"publié le : " + item.serialized_data['publish_date'].replace('"',''))
+    c.drawString(100,620,"dernière modification le : " + item.serialized_data['last_update_date'].replace('"',''))
+    c.drawString(100,600,"photo disponible : " + item.serialized_data['nbphoto'].replace('"',''))
+    c.drawString(100,580,"prix : " + item.serialized_data['prix'].replace('"',''))
+    c.drawString(100,560,"surface : " + item.serialized_data['surface'].replace('"',''))
+    c.drawString(100,540,"nombre de pièces : " + item.serialized_data['pieces'].replace('"',''))
     try:
-        c.drawString(100,300,    "ges : " + item.serialized_data['ges'])
+        c.drawString(100,520,"ges : " + item.serialized_data['ges'].replace('"',''))
     except:
         pass
     try:
-        c.drawString(100,250,    "nrj : " + item.serialized_data['nrj'])
+        c.drawString(100,500,"nrj : " + item.serialized_data['nrj'].replace('"',''))
     except:
         pass
+
+    textobject = c.beginText()
+    textobject.setTextOrigin(100, 480)
+    textobject.textLines(item.description.replace('.','.\n'))
+    c.drawText(textobject)
     c.showPage()
 
-    # Download img
+    # Download and write img
     for i in range(0,len(item.url_img_list)):
         url = item.url_img_list[i]
         f = open(str(i)+".jpg",'wb')

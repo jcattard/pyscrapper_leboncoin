@@ -69,9 +69,7 @@ if __name__ == '__main__':
             except:
                 print(item.ad_number())
                 print("%s: %s" % (sys.exc_info()[0], sys.exc_info()[1]))
-                break
         print("=====")
-        c.save()
     # close pdf file
     c.save()
 
