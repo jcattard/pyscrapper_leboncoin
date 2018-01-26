@@ -2,6 +2,9 @@
 from urllib.request import urlopen
 import os, random
 from reportlab.lib.units import inch, cm
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.platypus import Image
+
 
 def javascript_array2python_list(array):
     results = dict()
@@ -50,6 +53,7 @@ def write_pdf(item, c):
     c.drawText(textobject)
     c.showPage()
 
+    c.setPageSize(landscape(A4))
     # Download and write img
     for i in range(0,len(item.url_img_list)):
         noise = str(int(random.random()*100000))
@@ -57,10 +61,12 @@ def write_pdf(item, c):
         f = open(noise+str(i)+".jpg",'wb')
         f.write(urlopen(url).read())
         f.close()
+        image = Image(noise+str(i)+".jpg")
         # write img in pdf
-        c.drawImage(noise+str(i)+".jpg", 0, 0, 20*cm, 30*cm)
+        c.drawImage(noise+str(i)+".jpg", 0, 0, image.drawWidth*(landscape(A4)[0]/image.drawWidth), image.drawHeight*(landscape(A4)[1]/image.drawHeight))
         # Delete img files
         os.remove(noise+str(i)+".jpg")
         c.showPage()
         
 
+    c.setPageSize(A4)
