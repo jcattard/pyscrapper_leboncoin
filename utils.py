@@ -32,7 +32,7 @@ def get_image(path, width=1*cm):
     return Image(path, width=width, height=(width * aspect))
 
 
-def write_pdf(item, doc, no_image):
+def write_pdf(item, doc, image):
     styles = getSampleStyleSheet()
     Story=[]
     Story.append(Paragraph(item.serialized_data['titre'].replace('"',''), styles["Title"]))
@@ -63,7 +63,7 @@ def write_pdf(item, doc, no_image):
     Story.append(Paragraph(item.description, styles["Bullet"]))
     Story.append(PageBreak())
 
-    if(not no_image):
+    if(image):
         # Download and write img
         for i in range(0,len(item.url_img_list)):
             filename = str(int(random.random()*100000))+str(i)+".jpg"

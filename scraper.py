@@ -36,7 +36,7 @@ if __name__ == '__main__':
     parser.add_argument("--nbr_piece", help="nombre de pièce minimale (default = 0)", type=int, default=0)
     parser.add_argument("--prix_max", help="prix maximal (default = 0)", type=int, default=0)
     parser.add_argument("--surface_min", help="surface minimale (default = 0)", type=int, default=0)
-    parser.add_argument("--no_image", type=str2bool, nargs='?', const=True, default=True, help="no display images in report (default = True)")
+    parser.add_argument("--image", type=str2bool, nargs='?', const=True, default=False, help="display images in report (default = False)")
     parser.add_argument("--report_name", help="nom du rapport (default = report.pdf", type=str, default="report.pdf")
 
     args = parser.parse_args()
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     nbr_piece = args.nbr_piece
     prix_max = args.prix_max
     surface_min = args.surface_min
-    no_image  = args.no_image
+    image  = args.image
     report_name = args.report_name
     
     # Check inputs
@@ -72,8 +72,8 @@ if __name__ == '__main__':
         # Loop on result for city
         for item in browse(URL, DEFAULT_CATEGORIES):
             try:
-                item.serialize(no_image)
-                story += item.save(doc, no_image)
+                item.serialize(image)
+                story += item.save(doc, image)
                 print("-----")
             except:
                 print(item.ad_number())
