@@ -7,6 +7,7 @@ import argparse, sys, os, glob
 from common import DEFAULT_CATEGORIES, DEFAULT_LOCALISATIONS, DEFAULT_TYPES, DEFAULT_SURFACE, DEFAULT_PRIX
 from reportlab.platypus import SimpleDocTemplate
 from reportlab.lib.pagesizes import A4, landscape
+from utils import str2bool
 
 def browse(url, categories):
     category = url.split('/')[3]
@@ -34,13 +35,18 @@ if __name__ == '__main__':
     parser.add_argument("type_bien", help="type de bien (maison, appartement, terrain)", type=str)
     parser.add_argument("--nbr_piece", help="nombre de pièce minimale (default = 0)", type=int, default=0)
     parser.add_argument("--prix_max", help="prix maximal (default = 0)", type=int, default=0)
-    parser.add_argument("--surface_min", help="surface minimale (default = 0) NOT USE", type=int, default=0)
+    parser.add_argument("--surface_min", help="surface minimale (default = 0)", type=int, default=0)
+    parser.add_argument("--no_image", type=str2bool, nargs='?', const=True, default=True, help="no display images in report (default = True)")
+    parser.add_argument("--report_name", help="nom du rapport (default = report.pdf", type=str, default="report.pdf")
+
     args = parser.parse_args()
     type_bien = args.type_bien.lower()
     nbr_piece = args.nbr_piece
     prix_max = args.prix_max
     surface_min = args.surface_min
-
+    no_image  = args.no_image
+    report_name = args.report_name
+    
     # Check inputs
     if str(prix_max) not in DEFAULT_PRIX:
         sys.exit("Wrong PRICE: price "+str(prix_max)+" does not exist, cadidates are ["+"; ".join([str(k) for k in DEFAULT_PRIX.keys()])+"]")
@@ -50,7 +56,7 @@ if __name__ == '__main__':
     # Loop on define location
     keys = list(DEFAULT_LOCALISATIONS.keys())
     # begin pdf file
-    doc = SimpleDocTemplate("report.pdf",pagesize=landscape(A4))
+    doc = SimpleDocTemplate(report_name,pagesize=landscape(A4))
     story=[]
 
     for key in keys:
@@ -66,8 +72,8 @@ if __name__ == '__main__':
         # Loop on result for city
         for item in browse(URL, DEFAULT_CATEGORIES):
             try:
-                item.serialize()
-                story += item.save(doc)
+                item.serialize(no_image)
+                story += item.save(doc, no_image)
                 print("-----")
             except:
                 print(item.ad_number())

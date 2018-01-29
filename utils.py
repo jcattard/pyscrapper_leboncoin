@@ -32,7 +32,7 @@ def get_image(path, width=1*cm):
     return Image(path, width=width, height=(width * aspect))
 
 
-def write_pdf(item, doc):
+def write_pdf(item, doc, no_image):
     styles = getSampleStyleSheet()
     Story=[]
     Story.append(Paragraph(item.serialized_data['titre'].replace('"',''), styles["Title"]))
@@ -44,8 +44,14 @@ def write_pdf(item, doc):
     Story.append(Paragraph("dernière modification le : " + item.serialized_data['last_update_date'].replace('"',''), styles["Bullet"]))
     Story.append(Paragraph("photo disponible : " + item.serialized_data['nbphoto'].replace('"',''), styles["Bullet"]))
     Story.append(Paragraph("prix : " + item.serialized_data['prix'].replace('"',''), styles["Bullet"]))
-    Story.append(Paragraph("surface : " + item.serialized_data['surface'].replace('"',''), styles["Bullet"]))
-    Story.append(Paragraph("nombre de pièces : " + item.serialized_data['pieces'].replace('"',''), styles["Bullet"]))
+    try:
+        Story.append(Paragraph("surface : " + item.serialized_data['surface'].replace('"',''), styles["Bullet"]))
+    except:
+        pass
+    try:
+        Story.append(Paragraph("nombre de pièces : " + item.serialized_data['pieces'].replace('"',''), styles["Bullet"]))
+    except:
+        pass
     try:
         Story.append(Paragraph("ges : " + item.serialized_data['ges'].replace('"',''), styles["Bullet"]))
     except:
@@ -57,16 +63,25 @@ def write_pdf(item, doc):
     Story.append(Paragraph(item.description, styles["Bullet"]))
     Story.append(PageBreak())
 
-    # Download and write img
-    for i in range(0,len(item.url_img_list)):
-        filename = str(int(random.random()*100000))+str(i)+".jpg"
-        url = item.url_img_list[i]
-        f = open(filename,'wb')
-        f.write(urlopen(url).read())
-        f.close()
-        # write imgs
-        im = Image(filename, 20*cm, 15*cm)
-        Story.append(im)
-        Story.append(PageBreak())
+    if(not no_image):
+        # Download and write img
+        for i in range(0,len(item.url_img_list)):
+            filename = str(int(random.random()*100000))+str(i)+".jpg"
+            url = item.url_img_list[i]
+            f = open(filename,'wb')
+            f.write(urlopen(url).read())
+            f.close()
+            # write imgs
+            im = Image(filename, 20*cm, 15*cm)
+            Story.append(im)
+            Story.append(PageBreak())
         
     return(Story)
+
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')

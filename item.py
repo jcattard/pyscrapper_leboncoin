@@ -14,7 +14,7 @@ class Immobilier(object):
         p2 = self.item_url.index(".htm")
         return self.item_url[p1:p2]
 
-    def serialize(self):
+    def serialize(self, no_image):
         # get infos
         body = self.data.find('body')
         script_elt = str(body.findAll('script')[3])
@@ -25,12 +25,16 @@ class Immobilier(object):
         end_option = object_data[:-1].rfind('}') + 1
         object_data = object_data[0:begin_option-1]+object_data[end_option+10:]
         self.serialized_data = javascript_array2python_list(object_data)
-        # get picture urls
-        script_img = body.find_all('script')[7]
-        self.url_img_list = get_img_urls(script_img)
         self.description = self.data.find('p', class_="value", itemprop="description").text
-
-    def save(self, doc):
+        # get picture urls
+        if(not no_image):
+            try:
+                script_img = body.find_all('script')[7]
+                self.url_img_list = get_img_urls(script_img)
+            except:
+                self.url_image_list = [self.data.find("meta", property="og:image")["content"]]
+                
+    def save(self, doc, no_image):
         print(self.serialized_data['titre'])
         # print(self.data.find('p', class_='item_photo').get_text())
         # print("annonce : " + self.serialized_data['offres'])
@@ -51,7 +55,7 @@ class Immobilier(object):
         # print("url : " + self.item_url)
 
         # generate pdf
-        return(write_pdf(self, doc))
+        return(write_pdf(self, doc, no_image))
         
     def __str__(self):
         return(self.item_url)
