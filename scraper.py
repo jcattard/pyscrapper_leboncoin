@@ -9,14 +9,7 @@ from reportlab.platypus import SimpleDocTemplate
 from reportlab.lib.pagesizes import A4, landscape
 from utils import str2bool
 
-def browse(url, categories):
-    category = url.split('/')[3]
-    if category not in categories:
-        raise Exception("Wrong URL: category '%s' does not exist" % category)
-    model = categories[category]
-
-    page = urlopen(url)
-    data = BeautifulSoup(page.read(), "html.parser")
+def get_item(data, model):
     items = data.find('section', class_="tabsContent block-white dontSwitch")
     if items:
         for link in items.findAll('a'):
@@ -27,7 +20,28 @@ def browse(url, categories):
             yield obj
     else:
         print("Pas d'annonce")
+    
 
+def browse(url, categories):
+    category = url.split('/')[3]
+    if category not in categories:
+        raise Exception("Wrong URL: category '%s' does not exist" % category)
+    model = categories[category]
+    page = urlopen(url)
+    data = BeautifulSoup(page.read(), "html.parser")
+    if data.find('span', class_="total_page"):
+        url_page = "https:" + data.find("a", class_="element page static link-like", id="next")["href"]
+        nbr_page = int(data.find("span", class_="total_page").text)
+        page_all = b''
+        for i in range(1,nbr_page+1):
+            print("page "+str(i)+"/"+str(nbr_page))
+            url_current = url_page.replace("?o=2", "?o="+str(i))
+            page_current = urlopen(url_current).read()
+            page_all += page_current
+        data_all = BeautifulSoup(page_all, "html.parser")
+        return(get_item(data_all, model))
+    else:
+        return(get_item(data, model))
 
 if __name__ == '__main__':
     # Parse inputs
@@ -58,7 +72,6 @@ if __name__ == '__main__':
     # begin pdf file
     doc = SimpleDocTemplate(report_name,pagesize=landscape(A4))
     story=[]
-
     for key in keys:
         cp = key
         ville = DEFAULT_LOCALISATIONS[key]
