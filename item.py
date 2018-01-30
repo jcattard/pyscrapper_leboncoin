@@ -37,24 +37,31 @@ class Immobilier(object):
                 pass
                 
     def save(self, doc, image):
-        print(self.serialized_data['titre'])
-        # print(self.data.find('p', class_='item_photo').get_text())
-        # print("annonce : " + self.serialized_data['offres'])
-        # print("publié le : " + self.serialized_data['publish_date'])
-        # print("dernière modification le : " + self.serialized_data['last_update_date'])
-        # print("photo disponible : " + self.serialized_data['nbphoto'])
-        # print("prix : " + self.serialized_data['prix'])
-        # print("surface : " + self.serialized_data['surface'])
-        # print("nombre de pièces : " + self.serialized_data['pieces'])
-        # try:
-        #     print("ges : " + self.serialized_data['ges'])
-        # except:
-        #     pass
-        # try:
-        #     print("nrj : " + self.serialized_data['nrj'])
-        # except:
-        #     pass
-        # print("url : " + self.item_url)
+        if "viager" not in self.data.text.lower():
+            print(self.serialized_data['titre'])
+            # print(self.data.find('p', class_='item_photo').get_text())
+            # print("annonce : " + self.serialized_data['offres'])
+            # print("publié le : " + self.serialized_data['publish_date'])
+            # print("dernière modification le : " + self.serialized_data['last_update_date'])
+            # print("photo disponible : " + self.serialized_data['nbphoto'])
+            # print("prix : " + self.serialized_data['prix'])
+            # print("surface : " + self.serialized_data['surface'])
+            # print("nombre de pièces : " + self.serialized_data['pieces'])
+            # try:
+            #     print("ges : " + self.serialized_data['ges'])
+            # except:
+            #     pass
+            # try:
+            #     print("nrj : " + self.serialized_data['nrj'])
+            # except:
+            #     pass
+            # print("url : " + self.item_url)
+            
+            # generate pdf
+            return(write_pdf(self, doc, image))
+        else:
+            print("viager")
+            return()
 
         # generate pdf
         return(write_pdf(self, doc, image))
