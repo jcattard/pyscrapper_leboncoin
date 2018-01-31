@@ -9,7 +9,7 @@ from reportlab.lib.pagesizes import A4, landscape
 
 from utils import str2bool, make_url, parse_inputs
 from item import Immobilier, Vehicule
-from common import DEFAULT_PRIX, DEFAULT_SURFACE, DEFAULT_LOCALISATIONS, DEFAULT_CATEGORIES
+from common import DEFAULT_LOCALISATIONS, DEFAULT_CATEGORIES
 
 def get_item(data, model):
     items = data.find('section', class_="tabsContent block-white dontSwitch")
