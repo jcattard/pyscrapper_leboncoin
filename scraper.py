@@ -3,11 +3,13 @@
 from urllib.request import urlopen
 from urllib.parse import quote
 from bs4 import BeautifulSoup
-import argparse, sys, os, glob
-from common import DEFAULT_CATEGORIES, DEFAULT_LOCALISATIONS, DEFAULT_TYPES, DEFAULT_SURFACE, DEFAULT_PRIX
+import sys, os, glob
 from reportlab.platypus import SimpleDocTemplate
 from reportlab.lib.pagesizes import A4, landscape
-from utils import str2bool
+
+from utils import str2bool, make_url, parse_inputs
+from item import Immobilier, Vehicule
+from common import DEFAULT_PRIX, DEFAULT_SURFACE, DEFAULT_LOCALISATIONS, DEFAULT_CATEGORIES
 
 def get_item(data, model):
     items = data.find('section', class_="tabsContent block-white dontSwitch")
@@ -26,7 +28,7 @@ def browse(url, categories):
     category = url.split('/')[3]
     if category not in categories:
         raise Exception("Wrong URL: category '%s' does not exist" % category)
-    model = categories[category]
+    model = eval(categories[category])
     page = urlopen(url)
     data = BeautifulSoup(page.read(), "html.parser")
     if data.find('span', class_="total_page"):
@@ -45,48 +47,25 @@ def browse(url, categories):
 
 if __name__ == '__main__':
     # Parse inputs
-    parser = argparse.ArgumentParser(description='Scrapper le bon coin.')
-    parser.add_argument("type_bien", help="type de bien (maison, appartement, terrain)", type=str)
-    parser.add_argument("--nbr_piece", help="nombre de pièce minimale (default = 0)", type=int, default=0)
-    parser.add_argument("--prix_max", help="prix maximal (default = 0)", type=int, default=0)
-    parser.add_argument("--surface_min", help="surface minimale (default = 0)", type=int, default=0)
-    parser.add_argument("--image", type=str2bool, nargs='?', const=True, default=False, help="display images in report (default = False)")
-    parser.add_argument("--report_name", help="nom du rapport (default = report.pdf", type=str, default="report.pdf")
-
-    args = parser.parse_args()
-    type_bien = args.type_bien.lower()
-    nbr_piece = args.nbr_piece
-    prix_max = args.prix_max
-    surface_min = args.surface_min
-    image  = args.image
-    report_name = args.report_name
-    
-    # Check inputs
-    if str(prix_max) not in DEFAULT_PRIX:
-        sys.exit("Wrong PRICE: price "+str(prix_max)+" does not exist, cadidates are ["+"; ".join([str(k) for k in DEFAULT_PRIX.keys()])+"]")
-    if str(surface_min) not in DEFAULT_SURFACE:
-        sys.exit("Wrong surface: surface "+str(surface_min)+" does not exist, cadidates are ["+"; ".join([str(k) for k in DEFAULT_SURFACE.keys()])+"]")
+    args = parse_inputs()
 
     # Loop on define location
     keys = list(DEFAULT_LOCALISATIONS.keys())
     # begin pdf file
-    doc = SimpleDocTemplate(report_name,pagesize=landscape(A4))
+    doc = SimpleDocTemplate(args.report_name,pagesize=landscape(A4))
     story=[]
     for key in keys:
         cp = key
         ville = DEFAULT_LOCALISATIONS[key]
         # Set URL if set unset nbr_piece
-        if(nbr_piece>0):
-            URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX[str(prix_max)]+'&sqs='+DEFAULT_SURFACE[str(surface_min)]+'&ros='+str(nbr_piece)+'&ret='+DEFAULT_TYPES[type_bien]
-        else:
-            URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX[str(prix_max)]+'&sqs='+DEFAULT_SURFACE[str(surface_min)]+'&ret='+DEFAULT_TYPES[type_bien]
+        URL = make_url(ville, cp, args)
         # Print current city and cp
         print(ville + " " + cp)
         # Loop on result for city
         for item in browse(URL, DEFAULT_CATEGORIES):
             try:
-                item.serialize(image)
-                story += item.save(doc, image)
+                item.serialize(args.image)
+                story += item.save(doc, args.image)
                 print("-----")
             except:
                 print(item.ad_number())

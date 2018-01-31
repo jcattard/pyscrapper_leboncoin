@@ -7,6 +7,30 @@ from reportlab.platypus import Image, PageBreak, Paragraph
 from reportlab.lib import utils
 from reportlab.lib.styles import getSampleStyleSheet
 
+from common import ALIAS_CATEGORIES, DEFAULT_PRIX, DEFAULT_SURFACE, DEFAULT_TYPES
+from urllib.parse import quote
+import argparse, sys
+
+def parse_inputs():
+    parser = argparse.ArgumentParser(description='Scrapper le bon coin.')
+    parser.add_argument("type_bien", help="type de bien (maison, appartement, terrain)", type=str)
+    parser.add_argument("--nbr_piece", help="nombre de pièce minimale (default = 0)", type=int, default=0)
+    parser.add_argument("--prix_max", help="prix maximal (default = 0)", type=int, default=0)
+    parser.add_argument("--surface_min", help="surface minimale (default = 0)", type=int, default=0)
+    parser.add_argument("--image", type=str2bool, nargs='?', const=True, default=False, help="display images in report (default = False)")
+    parser.add_argument("--report_name", help="nom du rapport (default = report.pdf", type=str, default="report.pdf")
+
+    args = parser.parse_args()
+    
+    # Check inputs
+    if str(args.prix_max) not in DEFAULT_PRIX:
+        sys.exit("Wrong PRICE: price "+str(args.prix_max)+" does not exist, cadidates are ["+"; ".join([str(k) for k in DEFAULT_PRIX.keys()])+"]")
+    if str(args.surface_min) not in DEFAULT_SURFACE:
+        sys.exit("Wrong surface: surface "+str(args.surface_min)+" does not exist, cadidates are ["+"; ".join([str(k) for k in DEFAULT_SURFACE.keys()])+"]")
+
+    return(args)
+
+
 
 def javascript_array2python_list(array):
     results = dict()
@@ -31,35 +55,14 @@ def get_image(path, width=1*cm):
     aspect = ih / float(iw)
     return Image(path, width=width, height=(width * aspect))
 
-
 def write_pdf(item, doc, image):
     styles = getSampleStyleSheet()
     Story=[]
     Story.append(Paragraph(item.serialized_data['titre'].replace('"',''), styles["Title"]))
-
     Story.append(Paragraph("url : " + item.item_url, styles["Bullet"]))
-    Story.append(Paragraph("annonce : " + item.serialized_data['offres'].replace('"',''), styles["Bullet"]))
     Story.append(Paragraph("ville : " + item.serialized_data['city'].replace('"','') + " ("+item.serialized_data['cp'].replace('"','')+")", styles["Bullet"]))
-    Story.append(Paragraph("publié le : " + item.serialized_data['publish_date'].replace('"',''), styles["Bullet"]))
-    Story.append(Paragraph("dernière modification le : " + item.serialized_data['last_update_date'].replace('"',''), styles["Bullet"]))
-    Story.append(Paragraph("photo disponible : " + item.serialized_data['nbphoto'].replace('"',''), styles["Bullet"]))
-    Story.append(Paragraph("prix : " + item.serialized_data['prix'].replace('"',''), styles["Bullet"]))
-    try:
-        Story.append(Paragraph("surface : " + item.serialized_data['surface'].replace('"',''), styles["Bullet"]))
-    except:
-        pass
-    try:
-        Story.append(Paragraph("nombre de pièces : " + item.serialized_data['pieces'].replace('"',''), styles["Bullet"]))
-    except:
-        pass
-    try:
-        Story.append(Paragraph("ges : " + item.serialized_data['ges'].replace('"',''), styles["Bullet"]))
-    except:
-        pass
-    try:
-        Story.append(Paragraph("nrj : " + item.serialized_data['nrj'].replace('"',''), styles["Bullet"]))
-    except:
-        pass
+    for key in item.interest_data:
+        Story.append(Paragraph(key+" : "+item.interest_data[key].replace('"',''), styles["Bullet"]))
     Story.append(Paragraph(item.description, styles["Bullet"]))
     Story.append(PageBreak())
 
@@ -85,3 +88,16 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
+
+def make_url(ville, cp, args):    
+    if ALIAS_CATEGORIES[args.type_bien] == "ventes_immobilieres":
+        if args.nbr_piece == 0:
+            URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX[str(args.prix_max)]+'&sqs='+DEFAULT_SURFACE[str(args.surface_min)]+'&ros='+args.nbr_piece+'&ret='+DEFAULT_TYPES[str(args.type_bien)]
+        else:
+            URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX[str(args.prix_max)]+'&sqs='+DEFAULT_SURFACE[str(args.surface_min)]+'&ret='+DEFAULT_TYPES[str(args.type_bien)]
+    elif ALIAS_CATEGORIES[args.type_bien] == "motos":
+        URL = 'https://www.leboncoin.fr/motos/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&q='+args.type_bien+'&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX[str(args.prix_max)]
+    else:
+        URL=""
+            
+    return(URL)

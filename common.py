@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
-from item import Immobilier
+ALIAS_CATEGORIES = {
+    'maison' : 'ventes_immobilieres',
+    'appartement' : 'ventes_immobilieres',
+    'terrain' : 'ventes_immobilieres',
+    'quad' : 'motos'
+    }
 
 DEFAULT_CATEGORIES = {
-    # 'voitures': Item,
-    'ventes_immobilieres': Immobilier
+    'motos': "Vehicule",
+    'ventes_immobilieres': "Immobilier"
 }
 
 DEFAULT_LOCALISATIONS = {
