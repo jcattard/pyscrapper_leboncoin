@@ -7,9 +7,9 @@ import sys, os, glob
 from reportlab.platypus import SimpleDocTemplate
 from reportlab.lib.pagesizes import A4, landscape
 
-from utils import str2bool, make_url, parse_inputs
+from utils import str2bool, make_url, parse_inputs, get_region
 from item import Immobilier, Vehicule
-from common import DEFAULT_LOCALISATIONS, DEFAULT_CATEGORIES
+from common import DEFAULT_LOCALISATIONS, DEFAULT_CATEGORIES, ALIAS_DEPARTMENT
 
 def get_item(data, model):
     items = data.find('section', class_="tabsContent block-white dontSwitch")
@@ -54,13 +54,31 @@ if __name__ == '__main__':
     # begin pdf file
     doc = SimpleDocTemplate(args.report_name,pagesize=landscape(A4))
     story=[]
-    for key in keys:
-        cp = key
-        ville = DEFAULT_LOCALISATIONS[key]
+    if(args.departement == -1):
+        for key in keys:
+            cp = key
+            ville = DEFAULT_LOCALISATIONS[key]
+            # Set URL if set unset nbr_piece
+            URL = make_url(ville, cp, args)
+            # Print current city and cp
+            print(ville + " " + cp)
+            # Loop on result for city
+            for item in browse(URL, DEFAULT_CATEGORIES):
+                try:
+                    item.serialize(args.image)
+                    story += item.save(doc, args.image)
+                    print("-----")
+                except:
+                    print(item.ad_number())
+                    print("%s: %s" % (sys.exc_info()[0], sys.exc_info()[1]))
+            print("=====")
+    else:
+        cp = None
+        ville = None
         # Set URL if set unset nbr_piece
         URL = make_url(ville, cp, args)
         # Print current city and cp
-        print(ville + " " + cp)
+        print("search on region " + get_region(args) +", department "+ALIAS_DEPARTMENT[args.departement])
         # Loop on result for city
         for item in browse(URL, DEFAULT_CATEGORIES):
             try:
@@ -70,7 +88,7 @@ if __name__ == '__main__':
             except:
                 print(item.ad_number())
                 print("%s: %s" % (sys.exc_info()[0], sys.exc_info()[1]))
-        print("=====")
+                print("=====")
     # close pdf file
     doc.build(story)
     # Delete img files

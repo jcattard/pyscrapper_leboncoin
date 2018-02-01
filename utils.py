@@ -7,7 +7,7 @@ from reportlab.platypus import Image, PageBreak, Paragraph
 from reportlab.lib import utils
 from reportlab.lib.styles import getSampleStyleSheet
 
-from common import ALIAS_CATEGORIES, DEFAULT_PRIX_MAX_IMMOBILIER, DEFAULT_PRIX_MAX_VEHICULE, DEFAULT_SURFACE, DEFAULT_TYPES
+from common import ALIAS_CATEGORIES, DEFAULT_PRIX_MAX_IMMOBILIER, DEFAULT_PRIX_MAX_VEHICULE, DEFAULT_SURFACE, DEFAULT_TYPES, ALIAS_DEPARTMENT, ALIAS_REGION
 from urllib.parse import quote
 import argparse, sys
 
@@ -20,6 +20,7 @@ def parse_inputs():
     parser.add_argument("--image", type=str2bool, nargs='?', const=True, default=False, help="display images in report (default = False)")
     parser.add_argument("--cylindre_min", help="cylindré minimal (default = 0)", type=int, default=0)
     parser.add_argument("--report_name", help="nom du rapport (default = report.pdf)", type=str, default="report.pdf")
+    parser.add_argument("--departement", help="id du département considéré (default=-1)", type=int, default=-1)
 
     args = parser.parse_args()
     
@@ -34,7 +35,7 @@ def parse_inputs():
         if str(args.prix_max) not in DEFAULT_PRIX_MAX_VEHICULE:
             sys.exit("Wrong PRICE: price "+str(args.prix_max)+" does not exist, cadidates are ["+"; ".join([str(k) for k in DEFAULT_PRIX_MAX_VEHICULE.keys()])+"]")
     else:
-        URL=""
+        pass
 
     if str(args.surface_min) not in DEFAULT_SURFACE:
         sys.exit("Wrong SURFACE: surface "+str(args.surface_min)+" does not exist, cadidates are ["+"; ".join([str(k) for k in DEFAULT_SURFACE.keys()])+"]")
@@ -100,14 +101,38 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
-def make_url(ville, cp, args):    
-    if ALIAS_CATEGORIES[args.type_bien] == "ventes_immobilieres":
-        if args.nbr_piece == 0:
-            URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX_MAX_IMMOBILIER[str(args.prix_max)]+'&sqs='+DEFAULT_SURFACE[str(args.surface_min)]+'&ros='+args.nbr_piece+'&ret='+DEFAULT_TYPES[str(args.type_bien)]
+
+def get_region(args):
+    for k, v in iter(ALIAS_REGION.items()):
+        if args.departement in v:
+            return(k)
+    return(None)
+    
+def make_url(ville, cp, args):
+    if args.departement == -1:
+        if ALIAS_CATEGORIES[args.type_bien] == "ventes_immobilieres":
+            if args.nbr_piece == 0:
+                URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX_MAX_IMMOBILIER[str(args.prix_max)]+'&sqs='+DEFAULT_SURFACE[str(args.surface_min)]+'&ros='+args.nbr_piece+'&ret='+DEFAULT_TYPES[str(args.type_bien)]
+            else:
+                URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX_MAX_IMMOBILIER[str(args.prix_max)]+'&sqs='+DEFAULT_SURFACE[str(args.surface_min)]+'&ret='+DEFAULT_TYPES[str(args.type_bien)]
+        elif ALIAS_CATEGORIES[args.type_bien] == "motos":
+            URL = 'https://www.leboncoin.fr/motos/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&q='+args.type_bien+'&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX_MAX_VEHICULE[str(args.prix_max)]+'&ccs='+str(args.cylindre_min)
         else:
-            URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX_MAX_IMMOBILIER[str(args.prix_max)]+'&sqs='+DEFAULT_SURFACE[str(args.surface_min)]+'&ret='+DEFAULT_TYPES[str(args.type_bien)]
-    elif ALIAS_CATEGORIES[args.type_bien] == "motos":
-        URL = 'https://www.leboncoin.fr/motos/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&q='+args.type_bien+'&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX_MAX_VEHICULE[str(args.prix_max)]+'&ccs='+str(args.cylindre_min)
+            URL=""
     else:
-        URL=""
+        region = get_region(args)
+        if region:
+            if ALIAS_CATEGORIES[args.type_bien] == "ventes_immobilieres":
+                if args.nbr_piece == 0:
+                    URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/'+region+'/'+quote(ALIAS_DEPARTMENT[args.departement], safe='')+'/?th=1&pe='+DEFAULT_PRIX_MAX_IMMOBILIER[str(args.prix_max)]+'&sqs='+DEFAULT_SURFACE[str(args.surface_min)]+'&ros='+args.nbr_piece+'&ret='+DEFAULT_TYPES[str(args.type_bien)]
+                else:
+                    URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/'+region+'/'+quote(ALIAS_DEPARTMENT[args.departement], safe='')+'/?th=1&pe='+DEFAULT_PRIX_MAX_IMMOBILIER[str(args.prix_max)]+'&sqs='+DEFAULT_SURFACE[str(args.surface_min)]+'&ret='+DEFAULT_TYPES[str(args.type_bien)]
+            elif ALIAS_CATEGORIES[args.type_bien] == "motos":
+                URL = 'https://www.leboncoin.fr/motos/offres/'+region+'/'+quote(ALIAS_DEPARTMENT[args.departement], safe='')+'/?th=1&q='+args.type_bien+'&pe='+DEFAULT_PRIX_MAX_VEHICULE[str(args.prix_max)]+'&ccs='+str(args.cylindre_min)
+            else:
+                URL=""
+        else:
+            URL=""
+
+
     return(URL)
