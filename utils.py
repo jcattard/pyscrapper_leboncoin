@@ -111,8 +111,8 @@ def get_region(args):
 def make_url(ville, cp, args):
     if args.departement == -1:
         if ALIAS_CATEGORIES[args.type_bien] == "ventes_immobilieres":
-            if args.nbr_piece == 0:
-                URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX_MAX_IMMOBILIER[str(args.prix_max)]+'&sqs='+DEFAULT_SURFACE[str(args.surface_min)]+'&ros='+args.nbr_piece+'&ret='+DEFAULT_TYPES[str(args.type_bien)]
+            if args.nbr_piece != 0:
+                URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX_MAX_IMMOBILIER[str(args.prix_max)]+'&sqs='+DEFAULT_SURFACE[str(args.surface_min)]+'&ros='+str(args.nbr_piece)+'&ret='+DEFAULT_TYPES[str(args.type_bien)]
             else:
                 URL = 'https://www.leboncoin.fr/ventes_immobilieres/offres/provence_alpes_cote_d_azur/bouches_du_rhone/?th=1&location='+quote(ville, safe='')+'%20'+cp+'&pe='+DEFAULT_PRIX_MAX_IMMOBILIER[str(args.prix_max)]+'&sqs='+DEFAULT_SURFACE[str(args.surface_min)]+'&ret='+DEFAULT_TYPES[str(args.type_bien)]
         elif ALIAS_CATEGORIES[args.type_bien] == "motos":
