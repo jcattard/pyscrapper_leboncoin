@@ -66,7 +66,7 @@ if __name__ == '__main__':
             for item in browse(URL, DEFAULT_CATEGORIES):
                 try:
                     item.serialize(args.image)
-                    story += item.save(doc, args.image)
+                    story += item.save(doc, args)
                     print("-----")
                 except:
                     print(item.ad_number())
@@ -83,7 +83,7 @@ if __name__ == '__main__':
         for item in browse(URL, DEFAULT_CATEGORIES):
             try:
                 item.serialize(args.image)
-                story += item.save(doc, args.image)
+                story += item.save(doc, args)
                 print("-----")
             except:
                 print(item.ad_number())

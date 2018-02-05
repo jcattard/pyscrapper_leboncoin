@@ -9,7 +9,9 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 from common import ALIAS_CATEGORIES, DEFAULT_PRIX_MAX_IMMOBILIER, DEFAULT_PRIX_MAX_VEHICULE, DEFAULT_SURFACE, DEFAULT_TYPES, ALIAS_DEPARTMENT, ALIAS_REGION
 from urllib.parse import quote
-import argparse, sys
+import argparse, sys, time
+from datetime import datetime, timedelta
+
 
 def parse_inputs():
     parser = argparse.ArgumentParser(description='Scrapper le bon coin.')
@@ -21,6 +23,7 @@ def parse_inputs():
     parser.add_argument("--cylindre_min", help="cylindré minimal (default = 0)", type=int, default=0)
     parser.add_argument("--report_name", help="nom du rapport (default = report.pdf)", type=str, default="report.pdf")
     parser.add_argument("--departement", help="id du département considéré (default=-1)", type=int, default=-1)
+    parser.add_argument("--last_update", help="nombre de jour max depuis la dernière modification (default=0)", type=int, default=0)
 
     args = parser.parse_args()
     
@@ -40,6 +43,13 @@ def parse_inputs():
     if str(args.surface_min) not in DEFAULT_SURFACE:
         sys.exit("Wrong SURFACE: surface "+str(args.surface_min)+" does not exist, cadidates are ["+"; ".join([str(k) for k in DEFAULT_SURFACE.keys()])+"]")
 
+    if args.last_update >= 0:
+        if args.last_update == 0:
+            args.last_update = datetime(year=1, month=1, day=1)
+        else:
+            args.last_update = datetime.today() - timedelta(days=args.last_update)
+    else:
+        sys.exit("Wrong LAST_UPDATE: last_update may be positif")
     return(args)
 
 

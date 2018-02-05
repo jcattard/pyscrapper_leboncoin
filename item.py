@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from utils import javascript_array2python_list, get_img_urls, write_pdf
+from datetime import datetime
 
 class Immobilier(object):
     def __init__(self, item_url, data):
@@ -61,15 +62,19 @@ class Immobilier(object):
             elif(self.serialized_data['nbphoto'].replace('"','')=="0"):
                 pass
                 
-    def save(self, doc, image):
-        if "viager" not in self.data.text.lower():
-            print(self.serialized_data['titre'])
-            # generate pdf
-            return(write_pdf(self, doc, image))
+    def save(self, doc, args):
+        item_last_update = datetime.strptime(self.serialized_data['last_update_date'], '"%d/%m/%Y"')
+        if item_last_update > args.last_update:
+            if "viager" not in self.data.text.lower(): 
+                print(self.serialized_data['titre'])
+                # generate pdf
+                return(write_pdf(self, doc, args.image))
+            else:
+                print("viager")
+                return()
         else:
-            print("viager")
             return()
-        
+            
     def __str__(self):
         return(self.item_url)
 
@@ -131,10 +136,14 @@ class Vehicule(object):
             elif(self.serialized_data['nbphoto'].replace('"','')=="0"):
                 pass
                 
-    def save(self, doc, image):
-        print(self.serialized_data['titre'])
-        # generate pdf
-        return(write_pdf(self, doc, image))
+    def save(self, doc, args):
+        item_last_update = datetime.strptime(self.serialized_data['last_update_date'], '"%d/%m/%Y"')
+        if item_last_update > args.last_update:
+                print(self.serialized_data['titre'])
+                # generate pdf
+                return(write_pdf(self, doc, args.image))
+        else:
+            return()
         
     def __str__(self):
         return(self.item_url)
