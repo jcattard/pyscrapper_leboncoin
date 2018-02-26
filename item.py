@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from utils import javascript_array2python_list, get_img_urls, write_pdf
+from utils import get_img_urls, write_pdf
 from datetime import datetime
+import json
 
 class Immobilier(object):
     def __init__(self, item_url, data):
@@ -23,50 +24,41 @@ class Immobilier(object):
         begin = script_elt.index('{')
         end = script_elt.rfind('}') + 1
         object_data = script_elt[begin:end]
-        begin_option = object_data[1:].index('options')
-        end_option = object_data[:-1].rfind('}') + 1
-        object_data = object_data[0:begin_option-1]+object_data[end_option+10:]
-        self.serialized_data = javascript_array2python_list(object_data)
-        self.description = self.data.find('p', class_="value", itemprop="description").text
+        self.serialized_data = json.loads(object_data)['adview']
+        self.description = self.serialized_data['body']
         self.interest_data = {
-            'annonce' : self.serialized_data['offres'],
-            'publié le' : self.serialized_data['publish_date'],
-            'dernière modification le' : self.serialized_data['last_update_date'],
-            'photo disponible' : self.serialized_data['nbphoto'],
-            'prix' : self.serialized_data['prix'],
+            'annonce' : self.serialized_data['owner']['type'],
+            'publié le' : self.serialized_data['first_publication_date'],
+            'dernière modification le' : self.serialized_data['index_date'],
+            'photo disponible' : self.serialized_data['images']['nb_images'],
+            'prix' : str(self.serialized_data['price'][0])+" €",
         }
         try:
-            self.interest_data['surface'] = self.serialized_data['surface']
+            self.interest_data['surface'] = [d['value_label'] for d in self.serialized_data['attributes'] if d.get('key')=='square'][0]
         except:
             pass
         try:
-            self.interest_data['nombre de pièces'] = self.serialized_data['pieces']
+            self.interest_data['nombre de pièces'] = [d['value'] for d in self.serialized_data['attributes'] if d.get('key')=='rooms'][0]
         except:
             pass
         try:
-            self.interest_data['ges'] = self.serialized_data['ges']
+            self.interest_data['ges'] = [d['value_label'] for d in self.serialized_data['attributes'] if d.get('key')=='ges'][0]
         except:
             pass
         try:
-            self.interest_data['nrj'] = self.serialized_data['nrj']
+            self.interest_data['nrj'] = [d['value_label'] for d in self.serialized_data['attributes'] if d.get('key')=='energy_rate'][0]
         except:
             pass
 
         # get picture urls
         if(image):
-            if(self.serialized_data['nbphoto'].replace('"','')!="1"):
-                script_img = body.find_all('script')[7]
-                self.url_img_list = get_img_urls(script_img)
-            elif(self.serialized_data['nbphoto'].replace('"','')=="1"):
-                self.url_img_list = [self.data.find("meta", property="og:image")["content"]]
-            elif(self.serialized_data['nbphoto'].replace('"','')=="0"):
-                pass
+            self.url_img_list = self.serialized_data['images']['urls']
                 
     def save(self, doc, args):
-        item_last_update = datetime.strptime(self.serialized_data['last_update_date'], '"%d/%m/%Y"')
+        item_last_update = datetime.strptime(self.serialized_data['index_date'], '%Y-%m-%d %H:%M:%S')
         if item_last_update > args.last_update:
             if "viager" not in self.data.text.lower(): 
-                print(self.serialized_data['titre'])
+                print(self.serialized_data['subject'])
                 # generate pdf
                 return(write_pdf(self, doc, args.image))
             else:
@@ -101,45 +93,37 @@ class Vehicule(object):
         begin = script_elt.index('{')
         end = script_elt.rfind('}') + 1
         object_data = script_elt[begin:end]
-        begin_option = object_data[1:].index('options')
-        end_option = object_data[:-1].rfind('}') + 1
-        object_data = object_data[0:begin_option-1]+object_data[end_option+10:]
-        self.serialized_data = javascript_array2python_list(object_data)
-        self.description = self.data.find('p', class_="value", itemprop="description").text
+        self.serialized_data = json.loads(object_data)['adview']
+        self.description = self.serialized_data['body']
         self.interest_data = {
-            'annonce' : self.serialized_data['offres'],
-            'publié le' : self.serialized_data['publish_date'],
-            'dernière modification le' : self.serialized_data['last_update_date'],
-            'photo disponible' : self.serialized_data['nbphoto'],
-            'prix' : self.serialized_data['prix']
+            'annonce' : self.serialized_data['owner']['type'],
+            'publié le' : self.serialized_data['first_publication_date'],
+            'dernière modification le' : self.serialized_data['index_date'],
+            'photo disponible' : self.serialized_data['images']['nb_images'],
+            'prix' : str(self.serialized_data['price'][0])+" €",
         }
+        print(self.serialized_data)
         try:
-            self.interest_data['année'] = self.serialized_data['annee']
+            self.interest_data['année'] = [d['value_label'] for d in self.serialized_data['attributes'] if d.get('key')=='regdate'][0]
         except:
             pass
         try:
-            self.interest_data['kimométrage'] = self.serialized_data['km']
+            self.interest_data['kilométrage'] = [d['value_label'] for d in self.serialized_data['attributes'] if d.get('key')=='mileage'][0]
         except:
             pass
         try:
-            self.interest_data['Cylindrée'] = self.serialized_data['cc']
+            self.interest_data['Cylindrée'] = [d['value_label'] for d in self.serialized_data['attributes'] if d.get('key')=='cubic_capacity'][0]
         except:
             pass
 
         # get picture urls
         if(image):
-            if(self.serialized_data['nbphoto'].replace('"','')!="1"):
-                script_img = body.find_all('script')[7]
-                self.url_img_list = get_img_urls(script_img)
-            elif(self.serialized_data['nbphoto'].replace('"','')=="1"):
-                self.url_img_list = [self.data.find("meta", property="og:image")["content"]]
-            elif(self.serialized_data['nbphoto'].replace('"','')=="0"):
-                pass
+            self.url_img_list = self.serialized_data['images']['urls']
                 
     def save(self, doc, args):
-        item_last_update = datetime.strptime(self.serialized_data['last_update_date'], '"%d/%m/%Y"')
+        item_last_update = datetime.strptime(self.serialized_data['index_date'], '%Y-%m-%d %H:%M:%S')
         if item_last_update > args.last_update:
-                print(self.serialized_data['titre'])
+                print(self.serialized_data['subject'])
                 # generate pdf
                 return(write_pdf(self, doc, args.image))
         else:

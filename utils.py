@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from urllib.request import urlopen
 import random
-from reportlab.lib.units import inch, cm
-from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.units import cm
 from reportlab.platypus import Image, PageBreak, Paragraph
 from reportlab.lib import utils
 from reportlab.lib.styles import getSampleStyleSheet
@@ -54,14 +53,6 @@ def parse_inputs():
 
 
 
-def javascript_array2python_list(array):
-    results = dict()
-    for i in array[1:-1].split(','):
-        subres_list = i[1:].replace(' ','').split(':')
-        results[subres_list[0]] = subres_list[1]
-    return(results)
-
-
 def get_img_urls(script_img):
     url_img_list = []
     for line in script_img.contents[0].split('\t'):
@@ -80,11 +71,11 @@ def get_image(path, width=1*cm):
 def write_pdf(item, doc, image):
     styles = getSampleStyleSheet()
     Story=[]
-    Story.append(Paragraph(item.serialized_data['titre'].replace('"',''), styles["Title"]))
+    Story.append(Paragraph(item.serialized_data['subject'].replace('"',''), styles["Title"]))
     Story.append(Paragraph("url : " + item.item_url, styles["Bullet"]))
-    Story.append(Paragraph("ville : " + item.serialized_data['city'].replace('"','') + " ("+item.serialized_data['cp'].replace('"','')+")", styles["Bullet"]))
+    Story.append(Paragraph("ville : " + item.serialized_data['location']['city'].replace('"','') + " ("+item.serialized_data['location']['zipcode'].replace('"','')+")", styles["Bullet"]))
     for key in item.interest_data:
-        Story.append(Paragraph(key+" : "+item.interest_data[key].replace('"',''), styles["Bullet"]))
+        Story.append(Paragraph(key+" : "+str(item.interest_data[key]).replace('"',''), styles["Bullet"]))
     Story.append(Paragraph(item.description, styles["Bullet"]))
     Story.append(PageBreak())
 
