@@ -4,12 +4,14 @@ ALIAS_CATEGORIES = {
     'maison' : 'ventes_immobilieres',
     'appartement' : 'ventes_immobilieres',
     'terrain' : 'ventes_immobilieres',
-    'quad' : 'motos'
+    'quad' : 'motos',
+    'all' : 'annonces'
     }
 
 DEFAULT_CATEGORIES = {
     'motos': "Vehicule",
-    'ventes_immobilieres': "Immobilier"
+    'ventes_immobilieres': "Immobilier",
+    'annonces': "General"
 }
 
 DEFAULT_LOCALISATIONS = {

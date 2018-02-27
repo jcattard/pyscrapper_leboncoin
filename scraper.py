@@ -8,7 +8,7 @@ from reportlab.platypus import SimpleDocTemplate
 from reportlab.lib.pagesizes import A4, landscape
 
 from utils import str2bool, make_url, parse_inputs, get_region
-from item import Immobilier, Vehicule
+from item import Immobilier, Vehicule, General
 from common import DEFAULT_LOCALISATIONS, DEFAULT_CATEGORIES, ALIAS_DEPARTMENT
 
 def get_item(data, model):
