@@ -4,7 +4,7 @@ certifi==2017.11.5
 HTMLParser==0.0.2
 Js2Py==0.58
 lxml==4.1.1
-Pillow==5.0.0
+Pillow==6.2.0
 pyjsparser==2.5.2
 pytz==2017.3
 reportlab==3.4.0
